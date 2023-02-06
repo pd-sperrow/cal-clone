@@ -1,0 +1,66 @@
+import { TFunction } from "next-i18next";
+import { RRule } from "rrule";
+
+import dayjs from "@calcom/dayjs";
+import { getEveryFreqFor } from "@calcom/lib/recurringStrings";
+import type { CalendarEvent, Person } from "@calcom/types/Calendar";
+import type { RecurringEvent } from "@calcom/types/Calendar";
+
+import { Info } from "./Info";
+
+export function getRecurringWhen({
+  recurringEvent,
+  attendee,
+}: {
+  recurringEvent?: RecurringEvent | null;
+  attendee: Pick<Person, "language">;
+}) {
+  if (recurringEvent) {
+    const t = attendee.language.translate;
+    const rruleOptions = new RRule(recurringEvent).options;
+    const recurringEventConfig: RecurringEvent = {
+      freq: rruleOptions.freq,
+      count: rruleOptions.count || 1,
+      interval: rruleOptions.interval,
+    };
+    return `${getEveryFreqFor({ t, recurringEvent: recurringEventConfig })}`;
+  }
+  return "";
+}
+
+export function WhenInfo(props: { calEvent: CalendarEvent; timeZone: string; t: TFunction }) {
+  const { timeZone, t, calEvent: { recurringEvent } = {} } = props;
+
+  function getRecipientStart(format: string) {
+    return dayjs(props.calEvent.startTime).tz(timeZone).format(format);
+  }
+
+  function getRecipientEnd(format: string) {
+    return dayjs(props.calEvent.endTime).tz(timeZone).format(format);
+  }
+
+  const recurringInfo = getRecurringWhen({
+    recurringEvent: props.calEvent.recurringEvent,
+    attendee: props.calEvent.attendees[0],
+  });
+
+  return (
+    <div>
+      <Info
+        label={`${t("when")} ${recurringInfo !== "" ? ` - ${recurringInfo}` : ""}`}
+        lineThrough={
+          !!props.calEvent.cancellationReason && !props.calEvent.cancellationReason.includes("$RCH$")
+        }
+        description={
+          <>
+            {recurringEvent?.count ? `${t("starting")} ` : ""}
+            {t(getRecipientStart("dddd").toLowerCase())}, {t(getRecipientStart("MMMM").toLowerCase())}{" "}
+            {getRecipientStart("D, YYYY | h:mma")} - {getRecipientEnd("h:mma")}{" "}
+            <span style={{ color: "#888888" }}>({timeZone})</span>
+          </>
+        }
+        withSpacer
+      />
+    </div>
+  );
+}

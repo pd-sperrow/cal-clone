@@ -1,0 +1,110 @@
+{
+  "name": "calcom-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "packages/embeds/*",
+    "packages/features/*",
+    "packages/app-store/*",
+    "packages/app-store/ee/*"
+  ],
+  "scripts": {
+    "app-store-cli": "yarn workspace @calcom/app-store-cli",
+    "app-store:build": "yarn app-store-cli build",
+    "app-store:watch": "yarn app-store-cli watch",
+    "app-store": "yarn app-store-cli cli",
+    "build": "turbo run build --filter=@calcom/web...",
+    "clean": "find . -name node_modules -o -name .next -o -name .turbo -o -name dist -type d -prune | xargs rm -rf",
+    "db-deploy": "turbo run db-deploy",
+    "db-seed": "turbo run db-seed",
+    "db-studio": "yarn prisma studio",
+    "deploy": "turbo run deploy",
+    "dev:all": "turbo run dev --scope=\"@calcom/web\" --scope=\"@calcom/website\" --scope=\"@calcom/console\"",
+    "dev:api": "turbo run dev --scope=\"@calcom/web\" --scope=\"@calcom/api\"",
+    "dev:api:console": "turbo run dev --scope=\"@calcom/web\" --scope=\"@calcom/api\" --scope=\"@calcom/console\"",
+    "dev:console": "turbo run dev --scope=\"@calcom/web\" --scope=\"@calcom/console\"",
+    "dev:swagger": "turbo run dev --scope=\"@calcom/api\" --scope=\"@calcom/swagger\"",
+    "dev:website": "turbo run dev --scope=\"@calcom/web\" --scope=\"@calcom/website\"",
+    "dev": "turbo run dev --scope=\"@calcom/web\"",
+    "docs-build": "turbo run build --scope=\"@calcom/docs\" --include-dependencies",
+    "docs-dev": "turbo run dev --scope=\"@calcom/docs\"",
+    "docs-start": "turbo run start --scope=\"@calcom/docs\"",
+    "build-storybook": "turbo run build --scope=\"@calcom/storybook\"",
+    "dx": "turbo run dx",
+    "embed-tests-quick": "turbo run embed-tests-quick",
+    "embed-tests": "turbo run embed-tests",
+    "env-check:app-store": "dotenv-checker --schema .env.appStore.example --env .env.appStore",
+    "env-check:common": "dotenv-checker --schema .env.example --env .env",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "heroku-postbuild": "turbo run @calcom/web#build",
+    "lint:fix": "turbo run lint:fix",
+    "lint:report": "turbo run lint:report",
+    "lint": "turbo run lint",
+    "postinstall": "turbo run post-install",
+    "pre-commit": "lint-staged",
+    "predev": "echo 'Checking env files'",
+    "prepare": "husky install",
+    "prisma": "yarn workspace @calcom/prisma prisma",
+    "start": "turbo run start --scope=\"@calcom/web\"",
+    "tdd": "jest --watch",
+    "e2e": "NEXT_PUBLIC_IS_E2E=1 yarn playwright test --project=@calcom/web",
+    "e2e:app-store": "QUICK=true yarn playwright test --project=@calcom/app-store",
+    "test-e2e": "yarn db-seed && yarn build && yarn e2e",
+    "test-e2e:app-store": "yarn db-seed && yarn build && yarn e2e:app-store",
+    "test-playwright": "yarn playwright test --config=playwright.config.ts",
+    "test": "jest",
+    "type-check": "turbo run type-check",
+    "web": "yarn workspace @calcom/web"
+  },
+  "devDependencies": {
+    "@snaplet/copycat": "^0.3.0",
+    "@types/dompurify": "^2.4.0",
+    "@types/jest": "^28.1.7",
+    "dotenv-checker": "^1.1.5",
+    "husky": "^8.0.1",
+    "jest": "^28.1.0",
+    "jest-environment-jsdom": "^28.1.3",
+    "jest-mock-extended": "^2.0.7",
+    "jest-watch-select-projects": "^2.0.0",
+    "jest-watch-typeahead": "^2.0.0",
+    "lint-staged": "^12.5.0",
+    "prettier": "^2.7.1",
+    "ts-jest": "^28.0.8"
+  },
+  "dependencies": {
+    "turbo": "^1.4.3"
+  },
+  "resolutions": {
+    "@types/node": "16.9.1",
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6"
+  },
+  "lint-staged": {
+    "(apps|packages)/**/*.{js,ts,jsx,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.json": [
+      "prettier --write"
+    ],
+    "packages/prisma/schema.prisma": [
+      "prisma format"
+    ]
+  },
+  "engines": {
+    "node": ">=16.x",
+    "npm": ">=7.0.0",
+    "yarn": ">=1.19.0 < 2.0.0"
+  },
+  "prisma": {
+    "schema": "packages/prisma/schema.prisma",
+    "seed": "ts-node --transpile-only ./packages/prisma/seed.ts"
+  },
+  "packageManager": "yarn@1.22.17",
+  "syncpack": {
+    "filter": "^(?!@calcom).*",
+    "semverRange": ""
+  }
+}
